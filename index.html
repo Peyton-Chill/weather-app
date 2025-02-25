@@ -9,28 +9,27 @@
     <title>Awesome Weather</title>
     <link rel="icon" type="image/png" href="A_fun_and_friendly_sun_wearing_sunglasses_smiling.png">
     <link rel="apple-touch-icon" href="A_fun_and_friendly_sun_wearing_sunglasses_smiling.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="A_fun_and_friendly_sun_wearing_sunglasses_smiling.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="A_fun_and_friendly_sun_wearing_sunglasses_smiling.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="A_fun_and_friendly_sun_wearing_sunglasses_smiling.png">
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .weather-icon {
-            font-size: 4rem;
+            font-size: 4rem
         }
         .weather-item {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 1.2rem;
+            display: flex
+            align-items: center
+            justify-content: center
+            gap: 10px
+            font-size: 1.2rem
         }
         .weather-item img {
-            width: 40px;
-            height: 40px;
-        }
+    width: 40px;
+    height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+}
         .card {
-            text-align: center;
+            text-align: center
         }
     </style>
 </head>
@@ -38,6 +37,7 @@
     <div class="container py-5">
         <div class="card mx-auto col-12 col-md-8 col-lg-6 text-center p-4">
             <h1 class="text-primary" aria-label="Awesome Weather Application">Awesome Weather</h1>
+            <img src="A_fun_and_friendly_sun_wearing_sunglasses_smiling.png" alt="Fun Sun Icon" class="img-fluid mx-auto d-block" style="max-width: 150px;">
             <div id="weatherDisplay" class="d-none">
                 <h2 id="locationName" aria-label="Location Name"></h2>
                 <p class="weather-item" id="weatherCondition" aria-label="Weather Condition">
@@ -64,68 +64,72 @@
     </div>
     
     <script>
+        // Waits for the page to fully load before executing script
         document.addEventListener("DOMContentLoaded", () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const { latitude, longitude } = position.coords;
-                        fetchWeatherData(latitude, longitude);
+                        // Extracts latitude and longitude from geolocation API
+                        const { latitude, longitude } = position.coords
+                        fetchWeatherData(latitude, longitude)
                     },
                     (error) => {
-                        console.error("Error fetching location:", error);
-                        alert("Could not fetch location. Please enable location services and refresh the page.");
+                        console.error("Error fetching location:", error)
+                        alert("Could not fetch location. Please enable location services and refresh the page.")
                     }
-                );
+                )
             } else {
-                alert("Geolocation is not supported by your browser.");
+                alert("Geolocation is not supported by your browser.")
             }
-        });
+        })
 
+        // Fetches weather data using latitude and longitude
         async function fetchWeatherData(lat, lon) {
             try {
-                const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-                const geoData = await geoResponse.json();
-                const city = geoData.address.city || geoData.address.town || geoData.address.village || "Unknown City";
-                const state = geoData.address.state || "Unknown State";
-                const locationName = `${city}, ${state}`;
+                // Fetches city and state name based on latitude and longitude
+                const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+                const geoData = await geoResponse.json()
+                const city = geoData.address.city || geoData.address.town || geoData.address.village || "Unknown City"
+                const state = geoData.address.state || "Unknown State"
+                const locationName = `${city}, ${state}`
                 
-                const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weathercode&temperature_unit=fahrenheit&timezone=auto`);
-                const weatherData = await weatherResponse.json();
+                // Fetches weather data from Open-Meteo API
+                const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weathercode&temperature_unit=fahrenheit&timezone=auto`)
+                const weatherData = await weatherResponse.json()
                 
                 if (!weatherData.current) {
-                    alert("Failed to fetch weather data. Please try again.");
-                    return;
+                    alert("Failed to fetch weather data. Please try again.")
+                    return
                 }
                 
-                const temperature = weatherData.current.temperature_2m;
-                const humidity = weatherData.current.relative_humidity_2m ?? "N/A";
-                const precipitation = weatherData.current.precipitation ?? "N/A";
-                const weatherCode = weatherData.current.weathercode;
+                // Extracts weather data
+                const temperature = weatherData.current.temperature_2m
+                const humidity = weatherData.current.relative_humidity_2m ?? "N/A"; // N/A if null
+                const precipitation = weatherData.current.precipitation ?? "N/A"
+                const weatherCode = weatherData.current.weathercode
                 
+                // Maps the weather codes to descriptions and icons
                 const conditionMapping = {
                     0: ["Clear sky", "https://cdn-icons-png.flaticon.com/512/869/869869.png"],
                     1: ["Mainly clear", "https://cdn-icons-png.flaticon.com/512/1163/1163661.png"],
                     2: ["Partly cloudy", "https://cdn-icons-png.flaticon.com/512/414/414927.png"],
                     3: ["Overcast", "https://cdn-icons-png.flaticon.com/512/1146/1146860.png"],
-                    45: ["Foggy", "https://cdn-icons-png.flaticon.com/512/1779/1779809.png"],
-                    48: ["Depositing rime fog", "https://cdn-icons-png.flaticon.com/512/1779/1779809.png"],
-                    51: ["Light drizzle", "https://cdn-icons-png.flaticon.com/512/1163/1163657.png"],
-                    61: ["Light rain", "https://cdn-icons-png.flaticon.com/512/414/414927.png"],
                     80: ["Rain showers", "https://cdn-icons-png.flaticon.com/512/1146/1146860.png"],
-                };
+                }
                 
-                const [conditionText, conditionIcon] = conditionMapping[weatherCode] || ["Unknown", "https://cdn-icons-png.flaticon.com/512/869/869869.png"];
+                const [conditionText, conditionIcon] = conditionMapping[weatherCode] || ["Unknown", "https://cdn-icons-png.flaticon.com/512/869/869869.png"]
                 
-                document.getElementById("locationName").textContent = locationName;
-                document.getElementById("temperature").textContent = temperature;
-                document.getElementById("humidity").textContent = humidity;
-                document.getElementById("precipitation").textContent = precipitation;
-                document.getElementById("conditionText").textContent = conditionText;
-                document.getElementById("conditionIcon").src = conditionIcon;
-                document.getElementById("weatherDisplay").classList.remove("d-none");
+                // Updates the UI with fetched weather data
+                document.getElementById("locationName").textContent = locationName
+                document.getElementById("temperature").textContent = temperature
+                document.getElementById("humidity").textContent = humidity
+                document.getElementById("precipitation").textContent = precipitation
+                document.getElementById("conditionText").textContent = conditionText
+                document.getElementById("conditionIcon").src = conditionIcon
+                document.getElementById("weatherDisplay").classList.remove("d-none")
             } catch (error) {
-                console.error("Error fetching weather data:", error);
-                alert("An error occurred while fetching weather data.");
+                console.error("Error fetching weather data:", error)
+                alert("An error occurred while fetching weather data.")
             }
         }
     </script>
